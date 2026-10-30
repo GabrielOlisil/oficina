@@ -39,3 +39,5 @@ docker run -d \
 
 echo "Portainer iniciado com sucesso!"
 echo "Acesse: https://localhost:9443"
+
+docker logs -f --tail 100 "$CONTAINER"
