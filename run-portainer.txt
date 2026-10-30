@@ -1,0 +1,41 @@
+
+#!/bin/sh
+
+set -eu
+
+IMAGE="portainer/portainer-ce:lts"
+CONTAINER="portainer"
+VOLUME="portainer_data"
+
+# Verifica se o Docker está instalado
+if ! command -v docker >/dev/null 2>&1; then
+    echo "Erro: Docker não está instalado."
+    exit 1
+fi
+
+# Evita conflito com um container existente
+if docker container inspect "$CONTAINER" >/dev/null 2>&1; then
+    echo "Erro: O container '$CONTAINER' já existe."
+    exit 1
+fi
+
+# Baixa a imagem do Portainer
+echo "Baixando imagem do Portainer..."
+docker pull "$IMAGE"
+
+# Cria o volume persistente
+echo "Criando volume..."
+docker volume create "$VOLUME" >/dev/null
+
+# Inicia o Portainer em modo detached
+echo "Iniciando Portainer..."
+docker run -d \
+    --name "$CONTAINER" \
+    --restart=always \
+    -p 9443:9443 \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v "$VOLUME":/data \
+    "$IMAGE"
+
+echo "Portainer iniciado com sucesso!"
+echo "Acesse: https://localhost:9443"
